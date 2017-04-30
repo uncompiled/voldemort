@@ -7,6 +7,8 @@ It does not do anything useful.
 ## Pre-Requisites
 - Obtain a facebox from [machinebox.io](https://machinebox.io/)
 - Make sure the facebox is running
+- `.env` must set MB_KEY
+- `docker-compose start` starts dependencies
 
 ## Data Processing Pipeline
 
