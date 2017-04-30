@@ -1,0 +1,13 @@
+version: "3"
+services:
+  facebox:
+    container_name: voldemort_facebox
+    image: machinebox/facebox
+    ports:
+      - 8080:8080
+    env_file: .env
+  postgres:
+    container_name: voldemort_postgres
+    image: postgres:9.6-alpine
+    ports:
+      - 5432:5432
