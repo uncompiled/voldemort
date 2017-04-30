@@ -49,3 +49,6 @@ Example Response:
 }
 ```
 
+## Initialize Facebox State
+
+- `.state` file can be used to initialize `MB_FACEBOX_STATE_URL`
