@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/parnurzeal/gorequest"
 	"github.com/spf13/cobra"
@@ -19,7 +21,7 @@ var identifyCmd = &cobra.Command{
 			fmt.Println("Use --image to specify an image URL to identify")
 		} else {
 			response := identify(url)
-			fmt.Println(response.Body)
+			fmt.Println(response)
 		}
 	},
 }
@@ -29,7 +31,7 @@ func init() {
 	identifyCmd.Flags().StringVarP(&url, "image", "i", "", "image to identify")
 }
 
-func identify(imageURL string) gorequest.Response {
+func identify(imageURL string) IdentifyResponse {
 	request := gorequest.New()
 	body := fmt.Sprintf(`{"url":"%s"}`, imageURL)
 
@@ -38,5 +40,17 @@ func identify(imageURL string) gorequest.Response {
 		Set("Content-Type", "application/json; charset=utf-8").
 		Send(body).
 		End()
-	return resp
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	var identifiedFaces IdentifyResponse
+	err = json.Unmarshal(bodyBytes, &identifiedFaces)
+	if err != nil {
+		panic(err)
+	}
+
+	return identifiedFaces
 }

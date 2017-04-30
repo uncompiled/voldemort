@@ -8,9 +8,34 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TrainingData defines input to recognize a face.
 type TrainingData struct {
 	Name string `json:"name"` // Name of the person in the image
 	URL  string `json:"url"`  // URL of the image to be fetched
+}
+
+// IdentifyResponse defines the image recognition API response
+// and includes information about faces identified in an image.
+type IdentifyResponse struct {
+	Success    bool   `json:"success"`
+	FacesCount int    `json:"facesCount"`
+	Faces      []Face `json:"faces"`
+}
+
+// Face defines a face found in an image.
+type Face struct {
+	Rect    FaceRectangle `json:"rect"`
+	ID      string        `json:"id"`
+	Name    string        `json:"name"`
+	Matched bool          `json:"matched"`
+}
+
+// FaceRectangle defines the position of the face.
+type FaceRectangle struct {
+	Top    int `json:"top"`
+	Left   int `json:"left"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 var cfgFile string
