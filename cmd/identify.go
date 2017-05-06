@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var url string
+var imageURL string
 
 // identifyCmd represents the identify command
 var identifyCmd = &cobra.Command{
@@ -17,10 +17,10 @@ var identifyCmd = &cobra.Command{
 	Short: "Identify the faces in the photo",
 	Long:  `Submits a request to detect faces trained by the model`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(url) == 0 {
+		if len(imageURL) == 0 {
 			fmt.Println("Use --image to specify an image URL to identify")
 		} else {
-			response := identify(url)
+			response := identify(imageURL)
 			fmt.Println(response)
 		}
 	},
@@ -28,7 +28,7 @@ var identifyCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(identifyCmd)
-	identifyCmd.Flags().StringVarP(&url, "image", "i", "", "image to identify")
+	identifyCmd.Flags().StringVarP(&imageURL, "image", "i", "", "image to identify")
 }
 
 func identify(imageURL string) IdentifyResponse {
