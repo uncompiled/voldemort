@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/anthonynsimon/bild/blend"
+	"github.com/nfnt/resize"
 	"github.com/parnurzeal/gorequest"
 	"github.com/spf13/cobra"
 )
@@ -47,6 +49,10 @@ func swap(imageURL string, identifyResponse IdentifyResponse) {
 	srcURL, _ := url.Parse(imageURL)
 	pathParts := strings.Split(srcURL.Path, "/")
 	filename := pathParts[len(pathParts)-1]
+	if strings.HasSuffix(strings.ToLower(filename), ".jpg") == false {
+		// Add .jpg extension if the original image doesn't have it
+		filename = filename + ".jpg"
+	}
 
 	background, _, decodeErr := image.Decode(response.Body)
 	if decodeErr != nil {
@@ -61,7 +67,7 @@ func swap(imageURL string, identifyResponse IdentifyResponse) {
 	for _, face := range identifyResponse.Faces {
 		if face.Matched {
 			// Load replacement image into newFace
-			replacementImage, err := os.Open(filepath.Join("voldemort.png"))
+			replacementImage, err := os.Open(filepath.Join("swap.png"))
 			if err != nil {
 				panic(err)
 			}
@@ -73,12 +79,24 @@ func swap(imageURL string, identifyResponse IdentifyResponse) {
 
 			// Draw the newFace where it was found on top of the original image
 			drawPoint := image.Point{face.Rect.Left, face.Rect.Top}
-			sizeRect := newFace.Bounds()
-			rect := image.Rectangle{drawPoint, drawPoint.Add(sizeRect.Size())}
+			oldFaceSize := image.Point{face.Rect.Width, face.Rect.Height}
 
-			draw.Draw(canvas, rect, newFace, sizeRect.Min, draw.Src)
+			fmt.Printf("Face of size %v identified at %v \n", oldFaceSize, drawPoint)
+
+			// Resize newFace to fit the dimensions of the old face
+			newFace = resize.Resize(
+				uint(face.Rect.Width),
+				uint(face.Rect.Height),
+				newFace,
+				resize.Bilinear)
+			newFaceRect := newFace.Bounds()
+			rect := image.Rectangle{drawPoint, drawPoint.Add(oldFaceSize)}
+			draw.Draw(canvas, rect, newFace, newFaceRect.Min, draw.Src)
 		}
 	}
+
+	// Blend the original image with the new image
+	result := blend.Normal(background, canvas)
 
 	// Output the new image
 	outputImage, outputErr := os.Create(filename)
@@ -86,6 +104,6 @@ func swap(imageURL string, identifyResponse IdentifyResponse) {
 		panic(err)
 	}
 	defer outputImage.Close()
-	jpeg.Encode(outputImage, canvas, &jpeg.Options{Quality: jpeg.DefaultQuality})
+	jpeg.Encode(outputImage, result, &jpeg.Options{Quality: jpeg.DefaultQuality})
 
 }
