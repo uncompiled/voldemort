@@ -50,6 +50,9 @@ func sendTrainingData(data string) int {
 	resp, _, _ := request.Post("http://localhost:8080/facebox/teach").
 		Send(data).
 		End()
+	if resp.StatusCode == 500 {
+		fmt.Println(resp.Body)
+	}
 	return resp.StatusCode
 }
 
