@@ -37,7 +37,7 @@ func init() {
 	swapCmd.Flags().StringVarP(&imageURL, "image", "i", "", "image to identify")
 }
 
-func swap(imageURL string, identifyResponse IdentifyResponse) {
+func swap(imageURL string, identifyResponse IdentifyResponse) image.Image {
 	// Get the image from the URL
 	request := gorequest.New()
 	response, _, err := request.Get(imageURL).End()
@@ -106,4 +106,5 @@ func swap(imageURL string, identifyResponse IdentifyResponse) {
 	defer outputImage.Close()
 	jpeg.Encode(outputImage, result, &jpeg.Options{Quality: jpeg.DefaultQuality})
 
+	return result
 }
