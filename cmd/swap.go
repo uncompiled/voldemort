@@ -17,6 +17,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var swapSaveFile = false
+
 // swapCmd represents the swap command
 var swapCmd = &cobra.Command{
 	Use:   "swap",
@@ -27,6 +29,8 @@ var swapCmd = &cobra.Command{
 			fmt.Println("Use --image to specify an image URL to identify")
 		} else {
 			identifyResponse := identify(imageURL)
+			// Save image to disk when swap command is called directly
+			swapSaveFile = true
 			swap(imageURL, identifyResponse)
 		}
 	},
@@ -98,13 +102,15 @@ func swap(imageURL string, identifyResponse IdentifyResponse) image.Image {
 	// Blend the original image with the new image
 	result := blend.Normal(background, canvas)
 
-	// Output the new image
-	outputImage, outputErr := os.Create(filename)
-	if outputErr != nil {
-		panic(err)
+	if swapSaveFile == true {
+		// Output the new image to the filesystem
+		outputImage, outputErr := os.Create(filepath.Join("static", filename))
+		if outputErr != nil {
+			panic(err)
+		}
+		defer outputImage.Close()
+		jpeg.Encode(outputImage, result, &jpeg.Options{Quality: jpeg.DefaultQuality})
 	}
-	defer outputImage.Close()
-	jpeg.Encode(outputImage, result, &jpeg.Options{Quality: jpeg.DefaultQuality})
 
 	return result
 }
