@@ -22,6 +22,10 @@ var serveCmd = &cobra.Command{
 		fmt.Printf("Listening on port %d\n", httpServerPort)
 
 		r := mux.NewRouter()
+		r.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
+		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, "static/index.html")
+		})
 		r.HandleFunc("/swap", FaceSwapHandler)
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", httpServerPort), r))
 	},
